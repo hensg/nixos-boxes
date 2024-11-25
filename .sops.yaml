@@ -1,0 +1,9 @@
+keys:
+  - &henrique 661DCBE88A7EDCFCEB97ACC5BA8131FA6F593DDD
+  - &mailserver f653adbdf7e7faf4d4743a66b0c675982017809e
+creation_rules:
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+    - pgp:
+      - *henrique
+      - *mailserver
