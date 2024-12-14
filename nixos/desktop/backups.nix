@@ -5,6 +5,7 @@
       exclude = [
         "**/.cache"
         "**/target"
+        "**/Downloads"
         "/home/*/go/bin"
         "/home/*/go/pkg"
       ];

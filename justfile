@@ -1,3 +1,6 @@
+default:
+    @just --list
+
 format HOST FLAKE:
     #!/usr/bin/env bash
     echo "Are you sure you want to format the server at {{HOST}} with the flake {{FLAKE}}? [y/N]"

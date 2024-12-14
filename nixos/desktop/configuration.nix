@@ -1,7 +1,4 @@
-{ pkgs
-, inputs
-, ...
-}:
+{ pkgs, inputs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -16,6 +13,13 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   environment.systemPackages = with pkgs; [
+    woeusb
+    xsensors
+    mission-center
+    deluge
+    terraform
+    packer
+    k9s
     inetutils
     tcpdump
     ghostscript
@@ -39,7 +43,29 @@
     v4l-utils
     guvcview
     webcamoid
-    inputs.nixvim.packages.${system}.default
+
+    # vim stuff
+    unstable.neovim
+    unstable.rust-analyzer
+    unstable.nixd
+    unstable.pyright
+    unstable.black
+    unstable.yamlfmt
+    unstable.yaml-language-server
+    unstable.lua
+    unstable.lua-language-server
+    nodePackages.neovim
+    #inputs.nixvim.packages.${system}.default
+
+    unstable.vscode-extensions.vadimcn.vscode-lldb
+    poetry
+    (python3.withPackages (python-pkgs: [
+      python-pkgs.pandas
+      python-pkgs.requests
+      python-pkgs.pyquery
+      python-pkgs.debugpy
+    ]))
+
     unstable.atuin
     jq
     mdadm
@@ -57,12 +83,6 @@
     nixfmt-rfc-style
     alacritty
     syncthing
-    poetry
-    (python3.withPackages (python-pkgs: [
-      python-pkgs.pandas
-      python-pkgs.requests
-      python-pkgs.pyquery
-    ]))
     clipman
     pamixer
     nh
@@ -83,7 +103,8 @@
     lshw
     conky
     btop
-    wezterm
+    #wezterm
+    inputs.wezterm-flake.packages."${system}".default
     unstable.blesh
     unstable.sqlite
     wget
@@ -128,18 +149,21 @@
     libGLU
 
     gnome-extension-manager
+    capitaine-cursors
+    gnome-solanum
+    unstable.papirus-icon-theme
+    unstable.arc-theme
+    unstable.whitesur-gtk-theme
     gnome.adwaita-icon-theme
     gnome.gnome-characters
     gnome.gnome-tweaks
+    gnomeExtensions.zen
+    gnomeExtensions.just-perfection
     gnomeExtensions.mullvad-indicator
-    gnomeExtensions.vitals
     gnomeExtensions.pano
     gnomeExtensions.krypto
-    gnomeExtensions.dollar
-    gnomeExtensions.weather
-    gnomeExtensions.kube-config
+    gnomeExtensions.freon
     gnomeExtensions.spotify-tray
-    gnomeExtensions.mic-monitor
 
     openssl
 
@@ -170,6 +194,9 @@
   ];
 
   virtualisation.docker.enable = true;
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableExtensionPack = true;
+  users.extraGroups.vboxusers.members = [ "henrique" ];
 
   services = {
     xserver = {
@@ -202,8 +229,6 @@
       };
       desktopManager.gnome.enable = true;
     };
-
-
   };
 
   nixpkgs.config = {
@@ -251,7 +276,7 @@
 
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-cjk
+    noto-fonts-cjk-sans
     noto-fonts-emoji
     liberation_ttf
     fira-code
@@ -271,7 +296,6 @@
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
     EDITOR = "nvim";
   };
-
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

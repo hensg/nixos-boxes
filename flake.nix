@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixvim = {
       #url = "github:hensg/nixvim";
@@ -13,19 +13,24 @@
     simple-nixos-mailserver.url = "gitlab:simple-nixos-mailserver/nixos-mailserver/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
     hugo-site.url = "./nixos/website/hensg.dev/";
+    wezterm-flake = {
+      url = "github:wez/wezterm/main?dir=nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    inputs@{ nixpkgs
-    , nixpkgs-unstable
-    , flake-utils
-    , nixvim
-    , disko
-    , sops-nix
-    , nix-bitcoin
-    , simple-nixos-mailserver
-    , hugo-site
-    , ...
+    inputs@{
+      nixpkgs,
+      nixpkgs-unstable,
+      flake-utils,
+      nixvim,
+      disko,
+      sops-nix,
+      nix-bitcoin,
+      simple-nixos-mailserver,
+      hugo-site,
+      ...
     }:
     let
       boxesSystem = flake-utils.lib.system.x86_64-linux;
@@ -53,7 +58,9 @@
 
         mailserver = nixpkgs.lib.nixosSystem {
           system = boxesSystem;
-          specialArgs = { inherit inputs; };
+          specialArgs = {
+            inherit inputs;
+          };
           modules = [
             disko.nixosModules.disko
             sops-nix.nixosModules.sops
@@ -62,36 +69,40 @@
           ];
         };
 
-        website = nixpkgs.lib.nixosSystem
-          {
+        website = nixpkgs.lib.nixosSystem {
+          system = boxesSystem;
+          specialArgs = {
             system = boxesSystem;
-            specialArgs = {
-              system = boxesSystem;
-              inherit inputs hugo-site;
-            };
-            modules = [
-              disko.nixosModules.disko
-              ./nixos/website/configuration.nix
-            ];
+            inherit inputs hugo-site;
           };
-      };
-    } //
-    flake-utils.lib.eachDefaultSystem (system:
-    let pkgs = nixpkgs.legacyPackages.${system}; in
-    {
-      devShell = pkgs.mkShell {
-        sopsPGPKeyDirs = [
-          "./sopsKeys/"
-        ];
-        nativeBuildInputs = [
-          (pkgs.callPackage sops-nix { }).sops-import-keys-hook
-        ];
-        buildInputs = with pkgs; [
-          rsync
-          hugo
-          just
-        ];
+          modules = [
+            disko.nixosModules.disko
+            ./nixos/website/configuration.nix
+          ];
+        };
       };
     }
+    // flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+          };
+        };
+      in
+      {
+        devShell = pkgs.mkShell {
+          sopsPGPKeyDirs = [ "./sopsKeys/" ];
+          nativeBuildInputs = [ (pkgs.callPackage sops-nix { }).sops-import-keys-hook ];
+          buildInputs = with pkgs; [
+            rsync
+            hugo
+            just
+            terraform
+          ];
+        };
+      }
     );
 }

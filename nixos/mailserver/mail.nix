@@ -20,19 +20,20 @@
       domain = "hensg.dev";
       organizationName = "hensg";
     };
-    dkimKeyBits = 1535;
+    dkimKeyBits = 2048;
 
     loginAccounts = {
       "me@hensg.dev" = {
         name = "me@hensg.dev";
         hashedPasswordFile = "/run/secrets/pass";
-        aliases = [ "me@hensg.dev" "postmaster@hensg.dev" ];
+        aliases = [
+          "me@hensg.dev"
+          "postmaster@hensg.dev"
+        ];
         catchAll = [ "hensg.dev" ];
       };
     };
 
-    # Use Let's Encrypt certificates. Note that this needs to set up a stripped
-    # down nginx and opens port 80.
     certificateScheme = "acme-nginx";
   };
 
@@ -45,13 +46,21 @@
     firewall = {
       enable = true;
       checkReversePath = "loose";
-      allowedTCPPorts = [ 25 26 465 993 ];
+      allowedTCPPorts = [
+        25
+        587
+        993
+        443
+        465
+      ];
     };
     hosts = {
       "127.0.0.1" = [ "mail.hensg.dev" ];
     };
     nameservers = [
       "1.1.1.1"
+      "9.9.9.9"
+      "208.67.222.222"
       "8.8.8.8"
     ];
   };
@@ -60,7 +69,10 @@
     enable = true;
     dnssec = "true";
     domains = [ "~." ];
-    fallbackDns = [ "1.1.1.1" "8.8.8.8" ];
+    fallbackDns = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
     dnsovertls = "true";
   };
 }
