@@ -5,16 +5,24 @@ in
 {
   networking = {
     useHostResolvConf = false;
-    firewall.checkReversePath = "loose";
+    firewall = {
+      enable = true;
+      checkReversePath = "loose";
+      allowedTCPPorts = [  22000 ];
+      allowedUDPPortRanges = [
+        { from = 22000; to = 22000; }
+      ];
+    };
     nameservers = [
       "127.0.0.1"
       "::1"
     ];
+
   };
 
   users.users.henrique.openssh.authorizedKeys.keys = authorizedKeys;
 
-  environment.systemPackages = with pkgs;[
+  environment.systemPackages = with pkgs; [
     tailscale
     mullvad
     mullvad-vpn

@@ -15,7 +15,10 @@
     hugo-site.url = "./nixos/website/hensg.dev/";
     wezterm-flake = {
       url = "github:wez/wezterm/main?dir=nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
     };
   };
 
@@ -25,6 +28,7 @@
       nixpkgs-unstable,
       flake-utils,
       nixvim,
+      ghostty,
       disko,
       sops-nix,
       nix-bitcoin,
@@ -53,6 +57,11 @@
             nix-bitcoin.nixosModules.default
             disko.nixosModules.disko
             ./nixos/desktop/configuration.nix
+            {
+              environment.systemPackages = [
+                ghostty.packages.x86_64-linux.default
+              ];
+            }
           ];
         };
 

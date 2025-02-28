@@ -12,7 +12,28 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  services.tailscale.enable = false;
+
+  systemd.extraConfig = ''
+    DefaultLimitNOFILE=8192
+  '';
+
   environment.systemPackages = with pkgs; [
+    gh
+    lsof
+    nethogs
+    iw
+    gtop
+    iotop
+    libwacom
+    wacomtablet
+    cachix
+    ollama
+    cudatoolkit
+    libGLU
+    libGL
+    libva
+    vdpauinfo
     woeusb
     xsensors
     mission-center
@@ -48,13 +69,14 @@
     unstable.neovim
     unstable.rust-analyzer
     unstable.nixd
-    unstable.pyright
+    #unstable.pyright
+    unstable.pylyzer
+    unstable.ruff
     unstable.black
     unstable.yamlfmt
     unstable.yaml-language-server
     unstable.lua
     unstable.lua-language-server
-    nodePackages.neovim
     #inputs.nixvim.packages.${system}.default
 
     unstable.vscode-extensions.vadimcn.vscode-lldb
@@ -64,6 +86,10 @@
       python-pkgs.requests
       python-pkgs.pyquery
       python-pkgs.debugpy
+      python-pkgs.python-lsp-server
+      python-pkgs.python-lsp-ruff
+      python-pkgs.python-lsp-black
+      python-pkgs.pyls-isort
     ]))
 
     unstable.atuin
@@ -77,7 +103,7 @@
     lxappearance
     polybar
     openssl
-    chromium
+    unstable.chromium
     playerctl
     gparted
     nixfmt-rfc-style
@@ -148,21 +174,23 @@
     libGL
     libGLU
 
-    gnome-extension-manager
     capitaine-cursors
     gnome-solanum
     unstable.papirus-icon-theme
     unstable.arc-theme
     unstable.whitesur-gtk-theme
-    gnome.adwaita-icon-theme
-    gnome.gnome-characters
-    gnome.gnome-tweaks
-    gnomeExtensions.zen
+    gnome-extension-manager
+    adwaita-icon-theme
+    gnome-characters
+    gnome-tweaks
+    gnomeExtensions.sound-output-device-chooser
     gnomeExtensions.just-perfection
     gnomeExtensions.mullvad-indicator
     gnomeExtensions.pano
     gnomeExtensions.krypto
     gnomeExtensions.freon
+    gnomeExtensions.vitals
+    gnomeExtensions.astra-monitor
     gnomeExtensions.spotify-tray
 
     openssl
@@ -173,7 +201,7 @@
 
     spotify
     bitwarden-desktop
-    firefox
+    unstable.firefox
     thunderbird
     discord
     zoom-us
@@ -205,7 +233,7 @@
         layout = "us";
         variant = "intl";
       };
-      videoDrivers = [ "nvidia" ];
+      videoDrivers = [ "nvidia" "modesettings" ];
 
       # desktopManager = {
       #   xterm.enable = false;

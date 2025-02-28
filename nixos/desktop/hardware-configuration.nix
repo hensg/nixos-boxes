@@ -29,7 +29,7 @@
     "coretemp"
     "nct6776"
   ];
-  boot.extraModulePackages = [ ];
+  #boot.kernelParams = [ "module_blacklist=i915" ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/cbe6422e-477b-4c01-8f90-191be5df86d6";
@@ -73,7 +73,9 @@
 
   hardware.graphics = {
     enable = true;
+    enable32Bit = true;
   };
+
   hardware.nvidia = {
     # Modesetting is required.
     modesetting.enable = true;
@@ -98,6 +100,10 @@
     nvidiaSettings = true;
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.production;
+    #prime = {
+    #  offload.enable = true;
+    #  offload.enableOffloadCmd = true;
+    #};
   };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
