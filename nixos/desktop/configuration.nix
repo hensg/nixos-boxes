@@ -241,7 +241,7 @@
         layout = "us";
         variant = "intl";
       };
-      videoDrivers = [ "nvidia" "modesettings" ];
+      videoDrivers = [ "nvidia" ];
 
       # desktopManager = {
       #   xterm.enable = false;
@@ -260,7 +260,7 @@
       displayManager = {
         gdm = {
           enable = true;
-          wayland = false;
+          wayland = true;
         };
       };
       desktopManager.gnome.enable = true;

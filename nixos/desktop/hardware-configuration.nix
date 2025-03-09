@@ -29,7 +29,17 @@
     "coretemp"
     "nct6776"
   ];
-  #boot.kernelParams = [ "module_blacklist=i915" ];
+
+  # Enable DRM modesetting (essential for Wayland)
+  boot.kernelParams = [ "nvidia_drm.modeset=1" ];
+
+  # Recommended environment variables
+  environment.variables = {
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    GBM_BACKEND = "nvidia-drm";
+    WLR_NO_HARDWARE_CURSORS = "1";
+    NIXOS_OZONE_WL = "1";
+  };
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/cbe6422e-477b-4c01-8f90-191be5df86d6";
@@ -99,7 +109,7 @@
     # accessible via `nvidia-settings`.
     nvidiaSettings = true;
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
     #prime = {
     #  offload.enable = true;
     #  offload.enableOffloadCmd = true;
