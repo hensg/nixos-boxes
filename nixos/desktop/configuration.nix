@@ -14,11 +14,14 @@
 
   services.tailscale.enable = false;
 
-  systemd.extraConfig = ''
-    DefaultLimitNOFILE=8192
-  '';
-
   environment.systemPackages = with pkgs; [
+    davinci-resolve
+    perl
+    flamegraph
+    jemalloc
+    krita
+    xournalpp
+    inkscape
     gh
     lsof
     nethogs
@@ -104,6 +107,8 @@
     polybar
     openssl
     unstable.chromium
+    google-chrome
+    vivaldi
     playerctl
     gparted
     nixfmt-rfc-style
@@ -175,14 +180,17 @@
     libGLU
 
     capitaine-cursors
+    variety
     gnome-solanum
+    gnome-extension-manager
+    gnome-characters
+    gnome-tweaks
+    gnome-backgrounds
     unstable.papirus-icon-theme
     unstable.arc-theme
     unstable.whitesur-gtk-theme
-    gnome-extension-manager
     adwaita-icon-theme
-    gnome-characters
-    gnome-tweaks
+    gsettings-desktop-schemas
     gnomeExtensions.sound-output-device-chooser
     gnomeExtensions.just-perfection
     gnomeExtensions.mullvad-indicator
@@ -195,14 +203,14 @@
 
     openssl
 
-    obsidian
+    unstable.obsidian
 
     ffmpeg
 
     spotify
     bitwarden-desktop
     unstable.firefox
-    thunderbird
+    unstable.thunderbird
     discord
     zoom-us
 
