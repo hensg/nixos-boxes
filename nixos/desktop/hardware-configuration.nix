@@ -31,7 +31,12 @@
   ];
 
   # Enable DRM modesetting (essential for Wayland)
-  boot.kernelParams = [ "nvidia_drm.modeset=1" ];
+  boot.kernelParams = [
+    "nvidia_drm.modeset=1"
+    "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
+    "nvidia.NVreg_TemporaryFilePath=/var/tmp"
+    "nvidia.NVreg_EnableMSI=1"
+  ];
 
   # Recommended environment variables
   environment.variables = {
@@ -109,7 +114,7 @@
     # accessible via `nvidia-settings`.
     nvidiaSettings = true;
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.production;
     #prime = {
     #  offload.enable = true;
     #  offload.enableOffloadCmd = true;
