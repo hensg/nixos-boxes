@@ -14,7 +14,22 @@
 
   services.tailscale.enable = false;
 
+  services.udev.packages = with pkgs; [ gnome-settings-daemon ];
+
+  networking.extraHosts =
+  ''
+    100.28.194.99 api.boc0.net
+  '';
+
   environment.systemPackages = with pkgs; [
+    rclone
+    rsync
+    cameractrls
+    ffmpeg
+    gphoto2
+    mpv
+    heaptrack
+    graphviz
     davinci-resolve
     perl
     flamegraph
@@ -32,6 +47,8 @@
     wacomtablet
     cachix
     ollama
+    cudaPackages.cudnn
+    cudaPackages.libnpp
     cudatoolkit
     libGLU
     libGL
@@ -46,7 +63,6 @@
     k9s
     inetutils
     tcpdump
-    ghostscript
     pdftk
     (wrapOBS {
       plugins = with obs-studio-plugins; [
@@ -68,9 +84,11 @@
     guvcview
     webcamoid
 
+    unstable.slack
     # vim stuff
     unstable.neovim
     unstable.rust-analyzer
+    unstable.gopls
     unstable.nixd
     #unstable.pyright
     unstable.pylyzer
@@ -114,7 +132,6 @@
     nixfmt-rfc-style
     alacritty
     syncthing
-    clipman
     pamixer
     nh
     pwgen
@@ -134,8 +151,8 @@
     lshw
     conky
     btop
-    #wezterm
-    inputs.wezterm-flake.packages."${system}".default
+    unstable.wezterm
+    #inputs.wezterm-flake.packages."${system}".default
     unstable.blesh
     unstable.sqlite
     wget
@@ -143,6 +160,7 @@
     cron
     git
     xclip
+    xsel
     unzip
 
     thinkfan
@@ -191,6 +209,8 @@
     unstable.whitesur-gtk-theme
     adwaita-icon-theme
     gsettings-desktop-schemas
+    gnomeExtensions.caffeine
+    gnomeExtensions.appindicator
     gnomeExtensions.sound-output-device-chooser
     gnomeExtensions.just-perfection
     gnomeExtensions.mullvad-indicator
@@ -221,7 +241,8 @@
     appimage-run
     docker
     docker-compose
-    kubectl
+    unstable.kubectl
+    unstable.k9s
 
     dbeaver-bin
     dumbpipe
@@ -260,7 +281,7 @@
       displayManager = {
         gdm = {
           enable = true;
-          wayland = true;
+          wayland = false;
         };
       };
       desktopManager.gnome.enable = true;
@@ -278,8 +299,8 @@
     };
     gc = {
       automatic = true;
-      dates = "daily";
-      options = "--delete-older-than 7d";
+      dates = "monthly";
+      options = "--delete-older-than 30d";
     };
     settings = {
       experimental-features = [

@@ -28,22 +28,23 @@
     "uvcvideo"
     "coretemp"
     "nct6776"
+    "v4l2loopback"
   ];
+  boot.blacklistedKernelModules = [ ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
 
   # Enable DRM modesetting (essential for Wayland)
   boot.kernelParams = [
     "nvidia_drm.modeset=1"
-    "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
-    "nvidia.NVreg_TemporaryFilePath=/var/tmp"
-    "nvidia.NVreg_EnableMSI=1"
+    "module_blacklist=i915"
   ];
 
   # Recommended environment variables
   environment.variables = {
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     GBM_BACKEND = "nvidia-drm";
-    WLR_NO_HARDWARE_CURSORS = "1";
-    NIXOS_OZONE_WL = "1";
+    # WLR_NO_HARDWARE_CURSORS = "1";
+    #   NIXOS_OZONE_WL = "1";
   };
 
   fileSystems."/" = {
@@ -89,6 +90,9 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+    extraPackages = with pkgs; [
+      nvidia-vaapi-driver
+    ];
   };
 
   hardware.nvidia = {
