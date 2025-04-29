@@ -13,9 +13,7 @@
     simple-nixos-mailserver.url = "gitlab:simple-nixos-mailserver/nixos-mailserver/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
     hugo-site.url = "./nixos/website/hensg.dev/";
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-    };
+    ghostty.url = "github:ghostty-org/ghostty";
   };
 
   outputs =

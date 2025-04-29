@@ -22,30 +22,25 @@
     "sd_mod"
     "dm-crypt"
   ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [
-    "kvm-intel"
-    "uvcvideo"
-    "coretemp"
-    "nct6776"
-    "v4l2loopback"
-  ];
-  boot.blacklistedKernelModules = [ ];
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
 
-  # Enable DRM modesetting (essential for Wayland)
+  boot.initrd.kernelModules = [
+    "nvidia"
+    "nvidia_modeset"
+    "nvidia_drm"
+    "nvidia_uvm"
+  ];
+
   boot.kernelParams = [
     "nvidia_drm.modeset=1"
-    "module_blacklist=i915"
   ];
 
   # Recommended environment variables
-  environment.variables = {
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-    GBM_BACKEND = "nvidia-drm";
-    # WLR_NO_HARDWARE_CURSORS = "1";
-    #   NIXOS_OZONE_WL = "1";
-  };
+   environment.variables = {
+     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+     GBM_BACKEND = "nvidia-drm";
+     WLR_NO_HARDWARE_CURSORS = "1";
+     NIXOS_OZONE_WL = "1";
+   };
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/cbe6422e-477b-4c01-8f90-191be5df86d6";
@@ -89,10 +84,7 @@
 
   hardware.graphics = {
     enable = true;
-    enable32Bit = true;
-    extraPackages = with pkgs; [
-      nvidia-vaapi-driver
-    ];
+    #enable32Bit = true;
   };
 
   hardware.nvidia = {
@@ -118,7 +110,7 @@
     # accessible via `nvidia-settings`.
     nvidiaSettings = true;
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
     #prime = {
     #  offload.enable = true;
     #  offload.enableOffloadCmd = true;

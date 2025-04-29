@@ -16,10 +16,9 @@
 
   services.udev.packages = with pkgs; [ gnome-settings-daemon ];
 
-  networking.extraHosts =
-  ''
-    100.28.194.99 api.boc0.net
-  '';
+  users.defaultUserShell = pkgs.bash;
+
+  networking.extraHosts = '''';
 
   environment.systemPackages = with pkgs; [
     rclone
@@ -89,6 +88,7 @@
     unstable.neovim
     unstable.rust-analyzer
     unstable.gopls
+    unstable.deno
     unstable.nixd
     #unstable.pyright
     unstable.pylyzer
@@ -102,6 +102,7 @@
 
     unstable.vscode-extensions.vadimcn.vscode-lldb
     poetry
+    unstable.python313Packages.mcp
     (python3.withPackages (python-pkgs: [
       python-pkgs.pandas
       python-pkgs.requests
@@ -179,9 +180,11 @@
     gcc
     zig
     rustup
-    unstable.luarocks
+    luarocks
     go
-    nodejs_22
+    nodejs_latest
+    unstable.openai
+    unstable.python313Packages.llm-openai-plugin
     jdk
     jre
     terraform
@@ -255,6 +258,8 @@
   virtualisation.virtualbox.host.enableExtensionPack = true;
   users.extraGroups.vboxusers.members = [ "henrique" ];
 
+  systemd.services."systemd-suspend".serviceConfig.Environment = "SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=false";
+
   services = {
     xserver = {
       enable = true;
@@ -281,7 +286,7 @@
       displayManager = {
         gdm = {
           enable = true;
-          wayland = false;
+          wayland = true;
         };
       };
       desktopManager.gnome.enable = true;

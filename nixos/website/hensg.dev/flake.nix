@@ -26,7 +26,7 @@
           packages.website = pkgs.stdenv.mkDerivation {
             name = "website";
             src = self;
-            buildInputs = [ pkgs.git pkgs.nodePackages.prettier ];
+            buildInputs = [ pkgs.git pkgs.nodejs_latest ];
             buildPhase = '' 
               echo "Running hugo"
               ln -s ${inputs.hugo-paper} themes/PaperMod
