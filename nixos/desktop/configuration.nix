@@ -15,12 +15,21 @@
   services.tailscale.enable = false;
 
   services.udev.packages = with pkgs; [ gnome-settings-daemon ];
+  services.udev.extraRules = ''
+    KERNEL=="video[0-9]*", GROUP="video", MODE="0660"
+  '';
 
   users.defaultUserShell = pkgs.bash;
 
   networking.extraHosts = '''';
 
   environment.systemPackages = with pkgs; [
+    unstable.windsurf
+    unstable.jujutsu
+    v4l-utils
+    libv4l
+    guvcview # Camera testing
+    obs-studio # Optional: streaming/recording
     rclone
     rsync
     cameractrls
@@ -258,7 +267,8 @@
   virtualisation.virtualbox.host.enableExtensionPack = true;
   users.extraGroups.vboxusers.members = [ "henrique" ];
 
-  systemd.services."systemd-suspend".serviceConfig.Environment = "SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=false";
+  systemd.services."systemd-suspend".serviceConfig.Environment =
+    "SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=false";
 
   services = {
     xserver = {
@@ -329,6 +339,7 @@
     isNormalUser = true;
     description = "Henrique Goulart";
     extraGroups = [
+      "video"
       "networkmanager"
       "wheel"
       "docker"

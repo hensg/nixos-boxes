@@ -23,24 +23,35 @@
     "dm-crypt"
   ];
 
+  boot.loader.systemd-boot.configurationLimit = 4;
+
   boot.initrd.kernelModules = [
     "nvidia"
     "nvidia_modeset"
-    "nvidia_drm"
-    "nvidia_uvm"
+    "v4l2loopback"
+    # "nvidia_drm"
+    #"nvidia_uvm"
+  ];
+
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_12;
+  boot.extraModulePackages = with config.boot.kernelPackages; [
+    v4l2loopback
   ];
 
   boot.kernelParams = [
     "nvidia_drm.modeset=1"
+    "video_nr=10"
+    "card_label=VirtualCamera"
+    "exclusive_caps=1"
   ];
 
   # Recommended environment variables
-   environment.variables = {
-     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-     GBM_BACKEND = "nvidia-drm";
-     WLR_NO_HARDWARE_CURSORS = "1";
-     NIXOS_OZONE_WL = "1";
-   };
+  environment.variables = {
+    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    GBM_BACKEND = "nvidia-drm";
+    WLR_NO_HARDWARE_CURSORS = "1";
+    NIXOS_OZONE_WL = "1";
+  };
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/cbe6422e-477b-4c01-8f90-191be5df86d6";
