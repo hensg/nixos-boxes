@@ -15,21 +15,25 @@
   services.tailscale.enable = false;
 
   services.udev.packages = with pkgs; [ gnome-settings-daemon ];
-  services.udev.extraRules = ''
-    KERNEL=="video[0-9]*", GROUP="video", MODE="0660"
-  '';
+  # services.udev.extraRules = ''
+  #   KERNEL=="video[0-9]*", GROUP="video", MODE="0660"
+  # '';
 
   users.defaultUserShell = pkgs.bash;
 
   networking.extraHosts = '''';
 
+  services.flatpak.enable = true;
+
   environment.systemPackages = with pkgs; [
+    unstable.atuin
+    unstable.egl-wayland
     unstable.windsurf
     unstable.jujutsu
     v4l-utils
     libv4l
-    guvcview # Camera testing
-    obs-studio # Optional: streaming/recording
+    guvcview
+    unstable.obs-studio
     rclone
     rsync
     cameractrls
@@ -123,7 +127,6 @@
       python-pkgs.pyls-isort
     ]))
 
-    unstable.atuin
     jq
     mdadm
     tmux
@@ -135,7 +138,7 @@
     polybar
     openssl
     unstable.chromium
-    google-chrome
+    unstable.google-chrome
     vivaldi
     playerctl
     gparted
@@ -163,7 +166,6 @@
     btop
     unstable.wezterm
     #inputs.wezterm-flake.packages."${system}".default
-    unstable.blesh
     unstable.sqlite
     wget
     curl
@@ -248,7 +250,7 @@
 
     tor
     tor-browser
-    unstable.sparrow
+    sparrow
 
     appimage-run
     docker
@@ -340,6 +342,7 @@
     description = "Henrique Goulart";
     extraGroups = [
       "video"
+      "camera"
       "networkmanager"
       "wheel"
       "docker"

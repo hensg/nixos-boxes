@@ -25,24 +25,28 @@
 
   boot.loader.systemd-boot.configurationLimit = 4;
 
+  # kvm blacklists for virtualbox
+  boot.blacklistedKernelModules = [
+    "kvm_intel" # on Intel CPUs 
+    "kvm"       # the core module
+  ];
+
   boot.initrd.kernelModules = [
     "nvidia"
     "nvidia_modeset"
-    "v4l2loopback"
-    # "nvidia_drm"
-    #"nvidia_uvm"
+    "nvidia_drm"
   ];
 
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_12;
-  boot.extraModulePackages = with config.boot.kernelPackages; [
-    v4l2loopback
-  ];
+  #boot.extraModulePackages = with config.boot.kernelPackages; [
+  #  v4l2loopback
+  #];
 
   boot.kernelParams = [
     "nvidia_drm.modeset=1"
-    "video_nr=10"
-    "card_label=VirtualCamera"
-    "exclusive_caps=1"
+    # "video_nr=10"
+    # "card_label=VirtualCamera"
+    # "exclusive_caps=1"
   ];
 
   # Recommended environment variables
@@ -51,6 +55,7 @@
     GBM_BACKEND = "nvidia-drm";
     WLR_NO_HARDWARE_CURSORS = "1";
     NIXOS_OZONE_WL = "1";
+    ANGLE_DEFAULT_PLATFORM = "egl";
   };
 
   fileSystems."/" = {

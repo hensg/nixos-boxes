@@ -31,23 +31,30 @@
       ...
     }:
     let
-      boxesSystem = flake-utils.lib.system.x86_64-linux;
-      overlay-unstable = final: prev: {
-        unstable = import nixpkgs-unstable {
-          system = boxesSystem;
-          config.allowUnfree = true;
-        };
+      system = "x86_64-linux";
+      unstablePkgs = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
       };
+
+      overlay-unstable = final: prev: {
+        unstable = unstablePkgs;
+      };
+
     in
     {
       nixosConfigurations = {
         desktop = nixpkgs.lib.nixosSystem {
-          system = boxesSystem;
+          inherit system;
           specialArgs = {
             inherit inputs;
           };
           modules = [
-            { nixpkgs.overlays = [ overlay-unstable ]; }
+            {
+              nixpkgs.overlays = [
+                overlay-unstable
+              ];
+            }
             nix-bitcoin.nixosModules.default
             disko.nixosModules.disko
             ./nixos/desktop/configuration.nix
@@ -60,7 +67,7 @@
         };
 
         mailserver = nixpkgs.lib.nixosSystem {
-          system = boxesSystem;
+          inherit system;
           specialArgs = {
             inherit inputs;
           };
@@ -73,9 +80,8 @@
         };
 
         website = nixpkgs.lib.nixosSystem {
-          system = boxesSystem;
+          inherit system;
           specialArgs = {
-            system = boxesSystem;
             inherit inputs hugo-site;
           };
           modules = [
