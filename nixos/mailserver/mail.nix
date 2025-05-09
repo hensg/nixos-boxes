@@ -34,6 +34,9 @@
       };
     };
 
+    enableSubmission    = true;   # 587 + STARTTLS
+    enableSubmissionSsl = true;   # 465 (wrapper)
+    enableImapSsl       = true;   # 993
     certificateScheme = "acme-nginx";
   };
 
@@ -48,6 +51,7 @@
       checkReversePath = "loose";
       allowedTCPPorts = [
         25
+        80
         587
         993
         443

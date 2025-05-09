@@ -12,16 +12,16 @@ format HOST FLAKE:
     fi 
 
 update HOST FLAKE:
-    nixos-rebuild switch --flake .#{{FLAKE}} --target-host root@{{HOST}}
+    nix run nixpkgs#nixos-rebuild --switch --flake .#{{FLAKE}} --target-host root@{{HOST}}
 
-format-mailserver HOST: 
-    just format {{HOST}} mailserver
+format-mailserver HOST:
+    just format mail.hensg.dev mailserver
 
-update-mailserver HOST: 
-    just update {{HOST}} mailserver
+update-mailserver HOST:
+    just update mail.hensg.dev mailserver
 
-format-website HOST: 
-    just format {{HOST}} website
+format-website HOST:
+    just format hensg.dev website
 
-update-website HOST: 
-    just update {{HOST}} website
+update-website HOST:
+    just update hensg.dev website

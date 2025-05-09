@@ -14,6 +14,7 @@
       encryption = {
         mode = "none";
       };
+      extraCreateArgs = "--lock-wait 30";
       inhibitsSleep = true;
       compression = "lz4";
       startAt = "hourly";
