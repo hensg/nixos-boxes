@@ -233,7 +233,7 @@ ykman openpgp access change-admin-pin
 # Troubleshooting
 
 ## Open PGP card not available
-PCSC-Lite daemon sometimes conflicts with gpg-agent. This can be solved by putting the line `disable-ccid` into `~/.gnupg/scdaemon.conf`.
+PCSC-Lite daemon sometimes conflicts with gpg-agent. This can be solved by putting the line `disable-ccid` and `pcsc-shared` into `~/.gnupg/scdaemon.conf`.
 
 Then you may able to restart the service and get the card status:
 ```shell
