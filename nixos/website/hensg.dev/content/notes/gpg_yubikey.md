@@ -193,6 +193,7 @@ Add the following configuration to these files:
 ```shell
 # ~/.gnupg/gpg-agent.conf
 enable-ssh-support
+ttyname $GPG_TTY
 default-cache-ttl 600
 max-cache-ttl 1200
 ```
@@ -227,4 +228,16 @@ ykman openpgp access change-pin
 Change admin pin (PUK):
 ```shell 
 ykman openpgp access change-admin-pin
+```
+
+# Troubleshooting
+
+## Open PGP card not available
+PCSC-Lite daemon sometimes conflicts with gpg-agent. This can be solved by putting the line `disable-ccid` into `~/.gnupg/scdaemon.conf`.
+
+Then you may able to restart the service and get the card status:
+```shell
+sudo systemctl restart pcscd.service
+gpg --card-status
+
 ```
