@@ -1,0 +1,87 @@
+---
+- name: Reconcile the existing Hetzner VPS and firewall
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+  vars:
+    hcloud_token: "{{ lookup('env', 'CODEX_HETZNER') }}"
+    server_name: mail-web-next
+    firewall_name: mail-web-next-firewall
+    public_sources:
+      - 0.0.0.0/0
+      - ::/0
+    hcloud_firewall_rules:
+      - description: HTTPS website
+        direction: in
+        protocol: tcp
+        port: "443"
+        source_ips: "{{ public_sources }}"
+      - description: SMTP server-to-server mail
+        direction: in
+        protocol: tcp
+        port: "25"
+        source_ips: "{{ public_sources }}"
+      - description: SMTPS submission
+        direction: in
+        protocol: tcp
+        port: "465"
+        source_ips: "{{ public_sources }}"
+      - description: SMTP submission
+        direction: in
+        protocol: tcp
+        port: "587"
+        source_ips: "{{ public_sources }}"
+      - description: IMAPS
+        direction: in
+        protocol: tcp
+        port: "993"
+        source_ips: "{{ public_sources }}"
+      - description: SSH administration
+        direction: in
+        protocol: tcp
+        port: "22"
+        source_ips: "{{ public_sources }}"
+      - description: HTTP and ACME validation
+        direction: in
+        protocol: tcp
+        port: "80"
+        source_ips: "{{ public_sources }}"
+  tasks:
+    - name: Require the Hetzner API token without displaying it
+      ansible.builtin.assert:
+        that:
+          - hcloud_token | length > 0
+        fail_msg: Set CODEX_HETZNER in the environment before running this playbook.
+      no_log: true
+
+    - name: Ensure the current firewall rules are present
+      hetzner.hcloud.firewall:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ firewall_name }}"
+        rules: "{{ hcloud_firewall_rules }}"
+        state: present
+
+    - name: Adopt or reconcile the existing VPS by its stable name
+      hetzner.hcloud.server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ server_name }}"
+        server_type: cx23
+        image: debian-13
+        location: hel1
+        ssh_keys:
+          - "cardno:25 331 213"
+        firewalls:
+          - "{{ firewall_name }}"
+        backups: false
+        enable_ipv4: true
+        enable_ipv6: true
+        state: present
+
+    - name: Ensure the firewall is attached to this VPS
+      hetzner.hcloud.firewall_resource:
+        api_token: "{{ hcloud_token }}"
+        firewall: "{{ firewall_name }}"
+        servers:
+          - "{{ server_name }}"
+        state: present

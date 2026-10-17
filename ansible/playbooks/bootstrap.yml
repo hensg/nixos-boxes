@@ -1,0 +1,10 @@
+---
+- name: Prepare the new Linux host and publish the static site
+  hosts: mail_web
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  roles:
+    - base
+    - docker
+    - web

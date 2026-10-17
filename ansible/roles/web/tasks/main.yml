@@ -1,0 +1,136 @@
+---
+- name: Install nginx and Certbot
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+- name: Ensure website document root exists
+  ansible.builtin.file:
+    path: "{{ site_document_root }}"
+    state: directory
+    owner: root
+    group: www-data
+    mode: "0755"
+
+- name: Publish the locally built Hugo site
+  ansible.posix.synchronize:
+    src: "{{ hugo_build_dir }}/"
+    dest: "{{ site_document_root }}/"
+    archive: true
+    delete: true
+    use_ssh_args: true
+    verify_host: true
+  when: hugo_build_dir is defined
+
+- name: Ensure ACME challenge directory exists
+  ansible.builtin.file:
+    path: "{{ site_document_root }}/.well-known/acme-challenge"
+    state: directory
+    owner: root
+    group: www-data
+    mode: "0755"
+
+- name: Check for an existing website certificate
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ site_domain }}/fullchain.pem"
+  register: site_certificate
+
+- name: Set website TLS state from certificate presence
+  ansible.builtin.set_fact:
+    site_tls_enabled: "{{ site_certificate.stat.exists }}"
+
+- name: Install nginx virtual host for the static site
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: "/etc/nginx/sites-available/{{ site_domain }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable the website virtual host
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ site_domain }}"
+    dest: "/etc/nginx/sites-enabled/{{ site_domain }}"
+    state: link
+  notify: Reload nginx
+
+- name: Disable nginx's default virtual host
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Install the Certbot nginx deploy hook directory
+  ansible.builtin.file:
+    path: /etc/letsencrypt/renewal-hooks/deploy
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Reload nginx after certificate renewals
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/10-reload-nginx
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      /usr/bin/systemctl reload nginx
+
+- name: Ensure automatic certificate renewal is enabled
+  ansible.builtin.systemd:
+    name: certbot.timer
+    enabled: true
+    state: started
+
+- name: Apply the HTTP vhost before requesting a certificate
+  ansible.builtin.meta: flush_handlers
+
+- name: Request a website certificate when none exists
+  ansible.builtin.command:
+    argv:
+      - certbot
+      - certonly
+      - --webroot
+      - --webroot-path
+      - "{{ site_document_root }}"
+      - --cert-name
+      - "{{ site_domain }}"
+      - --domain
+      - "{{ site_domain }}"
+      - --domain
+      - "{{ site_www_domain }}"
+      - --email
+      - "{{ site_certificate_email }}"
+      - --agree-tos
+      - --no-eff-email
+      - --non-interactive
+  args:
+    creates: "/etc/letsencrypt/live/{{ site_domain }}/fullchain.pem"
+  when: not site_certificate.stat.exists
+
+- name: Check for the issued website certificate
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ site_domain }}/fullchain.pem"
+  register: site_certificate_after_request
+
+- name: Enable website TLS when the certificate is present
+  ansible.builtin.set_fact:
+    site_tls_enabled: "{{ site_certificate_after_request.stat.exists }}"
+
+- name: Install the final HTTP and HTTPS site configuration
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: "/etc/nginx/sites-available/{{ site_domain }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Apply the final website configuration
+  ansible.builtin.meta: flush_handlers

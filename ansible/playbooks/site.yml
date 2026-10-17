@@ -1,0 +1,12 @@
+---
+- name: Configure the combined website and mail host
+  hosts: mail_web
+  become: true
+  vars_files:
+    - ../group_vars/all.yml
+  roles:
+    - base
+    - docker
+    - role: web
+      tags: [web]
+    - mail

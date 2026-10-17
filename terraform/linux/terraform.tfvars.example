@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (ignored by Git) or supply equivalent TF_VAR_* values.
+# Prefer injecting the token through the environment. Do not commit secrets.
+hcloud_token = "REPLACE_ME"
+ssh_allowed_cidrs = ["REPLACE_WITH_ADMIN_IPV4_CIDR/32"]
+# All current servers are in hel1; keep this unless there is a reason to change.
+location = "hel1"

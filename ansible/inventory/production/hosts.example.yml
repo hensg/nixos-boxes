@@ -1,0 +1,7 @@
+all:
+  children:
+    mail_web:
+      hosts:
+        mail-web-next:
+          ansible_host: REPLACE_WITH_SERVER_PUBLIC_IPV4
+          ansible_user: root

@@ -1,0 +1,28 @@
+---
+- name: Refresh apt package metadata
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install baseline administration and security packages
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - fail2ban
+      - nftables
+      - python3
+      - rsync
+      - unattended-upgrades
+    state: present
+
+- name: Enable unattended security upgrades
+  ansible.builtin.service:
+    name: unattended-upgrades
+    enabled: true
+    state: started
+
+- name: Enable Fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    enabled: true
+    state: started

@@ -1,0 +1,10 @@
+site_domain: hensg.dev
+site_www_domain: www.hensg.dev
+site_certificate_email: henriquedsg89@gmail.com
+mail_domain: hensg.dev
+mail_fqdn: mail.hensg.dev
+site_document_root: /var/www/hensg.dev
+mail_root: /srv/mailserver
+docker_mailserver_image: ghcr.io/docker-mailserver/docker-mailserver:16.0.1
+# Keep antivirus disabled on the CX23; enable only after measuring available RAM.
+docker_mailserver_enable_clamav: false

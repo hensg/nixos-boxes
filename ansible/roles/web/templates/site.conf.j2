@@ -1,0 +1,49 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ site_domain }} {{ site_www_domain }};
+    root {{ site_document_root }};
+    index index.html;
+
+    location ^~ /.well-known/acme-challenge/ {
+        try_files $uri =404;
+    }
+
+{% if site_tls_enabled | bool %}
+    location / {
+        return 301 https://$host$request_uri;
+    }
+{% else %}
+    location / {
+        try_files $uri $uri/ =404;
+    }
+{% endif %}
+
+    location = /robots.txt {
+        default_type text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+}
+
+{% if site_tls_enabled | bool %}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name {{ site_domain }} {{ site_www_domain }};
+    root {{ site_document_root }};
+    index index.html;
+
+    ssl_certificate /etc/letsencrypt/live/{{ site_domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_domain }}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location = /robots.txt {
+        default_type text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
+}
+{% endif %}

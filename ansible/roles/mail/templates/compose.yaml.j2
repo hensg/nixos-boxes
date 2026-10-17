@@ -1,0 +1,34 @@
+services:
+  mailserver:
+    image: {{ docker_mailserver_image }}
+    container_name: mailserver
+    hostname: {{ mail_fqdn }}
+    ports:
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - ./mail-data/:/var/mail/
+      - ./mail-state/:/var/mail-state/
+      - ./mail-logs/:/var/log/mail/
+      - ./config/:/tmp/docker-mailserver/
+      - /etc/localtime:/etc/localtime:ro
+      - ./tls/:/tmp/dms/custom-certs/:ro
+    environment:
+      ENABLE_RSPAMD: "1"
+      ENABLE_OPENDKIM: "0"
+      ENABLE_CLAMAV: "{{ '1' if docker_mailserver_enable_clamav else '0' }}"
+      ENABLE_FAIL2BAN: "1"
+      SSL_TYPE: manual
+      SSL_CERT_PATH: /tmp/dms/custom-certs/fullchain.pem
+      SSL_KEY_PATH: /tmp/dms/custom-certs/privkey.pem
+    cap_add:
+      - NET_ADMIN
+    mem_limit: 2g
+    restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"

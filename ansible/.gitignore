@@ -1,0 +1,3 @@
+inventory/production/hosts.yml
+vault.yml
+*.retry

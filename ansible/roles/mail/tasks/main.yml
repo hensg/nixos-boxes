@@ -1,0 +1,125 @@
+---
+- name: Require migrated account and alias files before starting mail
+  ansible.builtin.assert:
+    that:
+      - dms_accounts_file is defined
+      - dms_accounts_file | length > 0
+      - dms_aliases_file is defined
+      - dms_aliases_file | length > 0
+      - dms_dkim_private_key_file is defined
+      - dms_dkim_public_file is defined
+      - dms_mail_fullchain_file is defined
+      - dms_mail_private_key_file is defined
+    fail_msg: >-
+      Set protected local paths for account, alias, DKIM, and mail TLS files.
+      Do not start the new mail service without its existing identity material.
+
+- name: Create Docker Mailserver root and Rspamd-readable configuration directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: "114"
+    mode: "0750"
+  loop:
+    - "{{ mail_root }}"
+    - "{{ mail_root }}/config"
+    - "{{ mail_root }}/config/rspamd"
+    - "{{ mail_root }}/config/rspamd/dkim"
+    - "{{ mail_root }}/config/rspamd/override.d"
+    - "{{ mail_root }}/tls"
+
+- name: Create mailbox and mail state directories
+  ansible.builtin.file:
+    path: "{{ mail_root }}/{{ item }}"
+    state: directory
+    owner: "5000"
+    group: "5000"
+    mode: "0750"
+  loop:
+    - mail-data
+    - mail-state
+
+- name: Create mail log directory
+  ansible.builtin.file:
+    path: "{{ mail_root }}/mail-logs"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Install migrated Docker Mailserver account configuration
+  ansible.builtin.copy:
+    src: "{{ dms_accounts_file }}"
+    dest: "{{ mail_root }}/config/postfix-accounts.cf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart Docker Mailserver
+
+- name: Install migrated Docker Mailserver alias configuration
+  ansible.builtin.copy:
+    src: "{{ dms_aliases_file }}"
+    dest: "{{ mail_root }}/config/postfix-virtual.cf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart Docker Mailserver
+
+- name: Install DKIM signing key
+  ansible.builtin.copy:
+    src: "{{ dms_dkim_private_key_file }}"
+    dest: "{{ mail_root }}/config/rspamd/dkim/{{ mail_domain }}-mail.private"
+    owner: root
+    group: "114"
+    mode: "0640"
+  notify: Restart Docker Mailserver
+
+- name: Install DKIM public record reference
+  ansible.builtin.copy:
+    src: "{{ dms_dkim_public_file }}"
+    dest: "{{ mail_root }}/config/rspamd/dkim/{{ mail_domain }}-mail.txt"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure Rspamd to sign with the existing DKIM key
+  ansible.builtin.template:
+    src: dkim_signing.conf.j2
+    dest: "{{ mail_root }}/config/rspamd/override.d/dkim_signing.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Docker Mailserver
+
+- name: Install current mail TLS certificate
+  ansible.builtin.copy:
+    src: "{{ dms_mail_fullchain_file }}"
+    dest: "{{ mail_root }}/tls/fullchain.pem"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Docker Mailserver
+
+- name: Install current mail TLS private key
+  ansible.builtin.copy:
+    src: "{{ dms_mail_private_key_file }}"
+    dest: "{{ mail_root }}/tls/privkey.pem"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart Docker Mailserver
+
+- name: Install Docker Mailserver Compose definition
+  ansible.builtin.template:
+    src: compose.yaml.j2
+    dest: "{{ mail_root }}/compose.yaml"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Restart Docker Mailserver
+
+- name: Start Docker Mailserver
+  community.docker.docker_compose_v2:
+    project_src: "{{ mail_root }}"
+    state: present

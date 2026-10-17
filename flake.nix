@@ -104,13 +104,19 @@
       {
         devShell = pkgs.mkShell {
           sopsPGPKeyDirs = [ "./sopsKeys/" ];
+          PYTHONPATH = pkgs.python3Packages.makePythonPath [
+            pkgs.python3Packages.python-dateutil
+            pkgs.python3Packages.requests
+          ];
           nativeBuildInputs = [ (pkgs.callPackage sops-nix { }).sops-import-keys-hook ];
           buildInputs = with pkgs; [
             rsync
             hugo
             just
             terraform
-          ];
+            sops
+            python3Packages.python-dateutil
+          ] ++ [ unstablePkgs.ansible ];
         };
       }
     );
